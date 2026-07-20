@@ -10,29 +10,32 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v7.0.1
       - run: echo "- Lint the code and run unit tests"
 
   build:
+    needs: integration
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v7.0.1
       - run: echo "- Build the artifact"
 
   test-artifact:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v7.0.1
       - run: echo "- Simulate and test the artifact"
 
   deploy-development:
+    needs: test-artifact
     environment: Development
     runs-on: ubuntu-latest
     steps:
       - run: echo "- Auto-deploy the artifact to the development environment"
 
   deploy-staging:
+    needs: deploy-development
     environment: Staging
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +52,7 @@ jobs:
 
   deploy-production:
     environment: Production
-    needs: deploy-staging
+    needs: test-staging
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -59,6 +62,7 @@ jobs:
           echo "- Deploy the artifact to the production environment"
 
   test-production:
+    needs: deploy-production
     runs-on: ubuntu-latest
     steps:
       - run: echo "- Test the artifact in the production environment"
